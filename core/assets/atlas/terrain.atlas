@@ -1,0 +1,27 @@
+
+terrain.png
+size: 512,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+dirt
+  rotate: false
+  xy: 2, 2
+  size: 128, 84
+  orig: 128, 84
+  offset: 0, 0
+  index: -1
+grass
+  rotate: false
+  xy: 132, 2
+  size: 128, 84
+  orig: 128, 84
+  offset: 0, 0
+  index: -1
+rock
+  rotate: false
+  xy: 262, 2
+  size: 128, 84
+  orig: 128, 84
+  offset: 0, 0
+  index: -1
