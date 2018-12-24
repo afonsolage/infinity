@@ -36,7 +36,7 @@ public class InfinityGame extends ApplicationAdapter {
 	private void dummyFillBuffer(TerrainBuffer buffer) {
 		for (int x = 0; x < TerrainBuffer.X_SIZE; x++) {
 			for (int y = 0; y < TerrainBuffer.Y_SIZE; y++) {
-				CellRef cell = buffer.getCell(x, y, 0);
+				CellRef cell = buffer.getCell(x, y, 2);
 				cell.setTileType(
 						x == 0 || y == 0 || x == TerrainBuffer.X_SIZE - 1 || y == TerrainBuffer.Y_SIZE - 1 ? 3 : 1);
 				
@@ -44,7 +44,19 @@ public class InfinityGame extends ApplicationAdapter {
 			}
 		}
 		
-		CellRef cell = buffer.getCell(10,10,1);
+		CellRef cell = buffer.getCell(0,0,2);
+		cell.setTileType(0);
+		cell.save();
+		
+		cell = buffer.getCell(0,0,1);
+		cell.setTileType(2);
+		cell.save();
+		
+		cell = buffer.getCell(0,1,3);
+		cell.setTileType(2);
+		cell.save();
+		
+		cell = buffer.getCell(1,0,3);
 		cell.setTileType(2);
 		cell.save();
 	}

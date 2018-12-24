@@ -170,8 +170,9 @@ public class IsometricTileMap extends Actor {
 	public static Vector3 toIsometric(Vector3 pos) {
 		float x = pos.x;
 		float y = pos.y;
+		
 		pos.x = (x - y) * TileType.TILE_WIDTH_HALF;
-		pos.y = (x + y) * TileType.TILE_HEIGHT_HALF;
+		pos.y = (x + y) * TileType.TILE_HEIGHT_HALF + (pos.z * TileType.TILE_HEIGHT_OFFSET);
 		return pos;
 	}
 }

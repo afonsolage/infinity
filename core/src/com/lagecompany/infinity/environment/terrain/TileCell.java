@@ -13,13 +13,17 @@ public class TileCell extends Actor {
 	private final TileType type;
 	private final int index;
 
-	private final float z;
+	private float z;
 
 	public TileCell(int index, TileType type, Sprite sprite) {
 		this.index = index;
 		this.type = type;
 		this.sprite = sprite;
 
+		calcIsometricPosition();
+	}
+
+	private void calcIsometricPosition() {
 		Vector3 isometric = IsometricTileMap.toIsometric(TerrainBuffer.toPosition(index));
 		z = isometric.z;
 		setPosition(isometric.x, isometric.y);

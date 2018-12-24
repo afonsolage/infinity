@@ -20,7 +20,7 @@ public class TerrainBuffer {
 	/**
 	 * Y-axis length of buffer
 	 */
-	public static final int HEIGHT = 4;
+	public static final int HEIGHT = 5;
 
 	/**
 	 * Z-axis length of buffer
