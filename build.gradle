@@ -69,6 +69,7 @@ project(":core-test") {
     apply plugin: "java"
 
     dependencies {
+    	compile project(":logic")
         compile project(":core")
     }
 }

@@ -24,6 +24,10 @@ public class CellRef {
 		refresh();
 	}
 
+	public int getIndex() {
+		return index;
+	}
+	
 	public long getValue() {
 		return value;
 	}

@@ -1,136 +1,173 @@
 package com.lagecompany.infinity.environment.terrain;
 
-import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.function.Predicate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import com.lagecompany.infinity.logic.terrain.CellRef;
+import com.lagecompany.infinity.logic.terrain.TerrainBuffer;
 
 public class IsometricTileMap extends Actor {
 	private static final String LOG_TAG = IsometricTileMap.class.getSimpleName();
-	public static final int WIDTH = 20;
-	public static final int HEIGHT = 20;
 
-	private TextureAtlas atlas;
-	private TIntObjectHashMap<TileCell> cells;
-	private TreeMap<Integer, TileCell> renderingOrder;
-	private boolean dirtOrder;
+	private final TextureAtlas atlas;
+	private final TerrainBuffer buffer;
+	private final TileCell[] cells;
 
-	public IsometricTileMap() {
-		cells = new TIntObjectHashMap<>(WIDTH * HEIGHT);
-		renderingOrder = new TreeMap<>();
+	public IsometricTileMap(TerrainBuffer buffer) {
+		if (buffer == null || !buffer.isAllocated()) {
+			logAndThrow("Invalid buffed received");
+		}
 
-		atlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
+		this.buffer = buffer;
+		this.cells = new TileCell[TerrainBuffer.BUFFER_LENGTH];
+		this.atlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
+	}
 
-		for (int y = 0; y < HEIGHT; y++) {
-			for (int x = 0; x < WIDTH; x++) {
-				createCellAt(x, y);
+	private void logAndThrow(String errorMessage) {
+		RuntimeException exception = new RuntimeException(errorMessage);
+		Gdx.app.error(LOG_TAG, errorMessage, exception);
+		throw exception;
+	}
+
+	private void updateTileCells() {
+		for (int i = 0; i < TerrainBuffer.BUFFER_LENGTH; i++) {
+			CellRef cell = buffer.getCell(i);
+
+			if (cell.getTileType() == 0) {
+				destroyTileCell(i);
+			} else {
+				updateTileCell(cell);
 			}
 		}
 	}
 
-	public void createCellAt(int x, int y) {
-		int index = toIndex(x, y);
-		if (cells.contains(index)) {
-			throw new RuntimeException("Failed to create cell at position " + x + "," + "y" + ". Cell already exists");
+	private void updateTileCell(CellRef ref) {
+		TileCell cell = cells[ref.getIndex()];
+		TileType type = TileType.getById(ref.getTileType());
+
+		if (type == TileType.NONE) {
+			logAndThrow("Invalid tile type: " + ref.getTileType());
 		}
 
-		// TODO: Create some noise generation later on
-		TileType type = (x == 0 || y == 0 || x == WIDTH - 1 || y == HEIGHT - 1) ? TileType.ROCK : TileType.GRASS;
-		Sprite sprite = atlas.createSprite(type.toString());
-		TileCell cell = new TileCell(index, sprite);
-		Vector2 pos = new Vector2(x, y);
-		pos = toIsometric(pos);
-		cell.setPosition(pos.x, pos.y);
-		cells.put(index, cell);
+		// If we'll change the cell type, we must destroy the existing one first and
+		// create a new one
+		if (cell != null && type != cell.getType()) {
+			destroyTileCell(ref.getIndex());
+			cell = null;
+		}
 
-		dirtOrder = true;
+		// If there is no cell or cell was destroyed before, let's create a new one
+		if (cell == null) {
+			Sprite sprite = atlas.createSprite(type.toString());
+
+			if (sprite == null) {
+				logAndThrow("Failed to create tile cell. Unable to find texture with name: " + type.toString());
+			}
+
+			cell = new TileCell(ref.getIndex(), type, sprite);
+			cells[ref.getIndex()] = cell;
+		}
+
+		updateTileCell(ref, cell);
 	}
 
-	public void destroyCellAt(int x, int y) {
-		TileCell removed = cells.remove(toIndex(x, y));
+	private void updateTileCell(CellRef ref, TileCell cell) {
+		// TODO: Update other properties, like lighting, etc
+	}
 
-		if (removed == null) {
-			Gdx.app.log(LOG_TAG, "Failed to destroy cell at " + x + ", " + y + ". Cell not found.");
-		} else {
-			dirtOrder = true;
-			removed.dispose();
+	private void destroyTileCell(int index) {
+		if (cells[index] != null) {
+			cells[index].dispose();
+			cells[index] = null;
 		}
 	}
 
-	public int getCellCount() {
-		return cells.size();
+//	public void createCellAt(int x, int y, TileType type) {
+//		int index = toIndex(x, y);
+//		if (cells.contains(index)) {
+//			throw new RuntimeException("Failed to create cell at position " + x + "," + "y" + ". Cell already exists");
+//		}
+//
+//		Sprite sprite = atlas.createSprite(type.toString());
+//
+//		if (sprite == null) {
+//			throw new RuntimeException("Failed to create cell at position " + x + "," + "y" + ". Sprite with name "
+//					+ type.toString() + " not found.");
+//		}
+//
+//		TileCell cell = new TileCell(index, sprite);
+//		Vector2 pos = new Vector2(x, y);
+//		pos = toIsometric(pos);
+//		cell.setPosition(pos.x, pos.y);
+//		cells.put(index, cell);
+//
+//		dirtOrder = true;
+//	}
+
+	public int countCells() {
+		return getCells(c -> true).size();
+	}
+
+	public ArrayList<TileCell> getCells(Predicate<TileCell> predicate) {
+		ArrayList<TileCell> list = new ArrayList<>();
+		for (TileCell cell : cells) {
+			if (cell != null && predicate.test(cell))
+				list.add(cell);
+		}
+		return list;
 	}
 
 	public TileCell findCell(Predicate<TileCell> predicate) {
-		TIntObjectIterator<TileCell> it = cells.iterator();
-
-		while (it.hasNext()) {
-			it.advance();
-			if (it.value() != null && predicate.test(it.value()))
-				return it.value();
+		for (TileCell cell : cells) {
+			if (cell != null && predicate.test(cell))
+				return cell;
 		}
-
 		return null;
 	}
 
 	public void dispose() {
-		TIntObjectIterator<TileCell> it = cells.iterator();
-
-		while (it.hasNext()) {
-			it.advance();
-			if (it.value() != null)
-				it.value().dispose();
+		for (TileCell cell : cells) {
+			if (cell != null)
+				cell.dispose();
 		}
-
-		cells.clear();
 		atlas.dispose();
 	}
 
 	@Override
 	public void act(float delta) {
+		if (buffer.isDirt()) {
+			updateTileCells();
+			buffer.setDirt(false);
+		}
 	}
 
 	@Override
 	public void draw(Batch batch, float parentAlpha) {
-		if (dirtOrder)
-			computeRenderingOrder();
+		for (int z = 0; z < TerrainBuffer.Z_SIZE; z++) {
+			for (int x = TerrainBuffer.X_SIZE - 1; x >= 0; x--) {
+				for (int y = TerrainBuffer.Y_SIZE - 1; y >= 0; y--) {
+					int index = TerrainBuffer.toIndex(x, y, z);
 
-		for (TileCell cell : renderingOrder.values()) {
-			cell.draw(batch, parentAlpha);
-		}
-	}
+					if (cells[index] == null)
+						continue;
 
-	private void computeRenderingOrder() {
-		renderingOrder.clear();
-		TIntObjectIterator<TileCell> it = cells.iterator();
-
-		while (it.hasNext()) {
-			it.advance();
-			TileCell cell = it.value();
-			if (cell != null) {
-				renderingOrder.put(cell.getOrder(), cell);
+					cells[index].draw(batch, parentAlpha);
+				}
 			}
 		}
 	}
 
-	public static int toIndex(float x, float y) {
-		// We'll use row-major to store data in cell map
-		return (int) y * WIDTH + (int) x;
+	public static Vector3 toIsometric(float x, float y, float z) {
+		return toIsometric(new Vector3(x, y, z));
 	}
 
-	public static Vector2 toPosition(int index) {
-		return new Vector2((int) (index % WIDTH), (int) (index / WIDTH));
-	}
-
-	public static Vector2 toIsometric(Vector2 pos) {
+	public static Vector3 toIsometric(Vector3 pos) {
 		float x = pos.x;
 		float y = pos.y;
 		pos.x = (x - y) * TileType.TILE_WIDTH_HALF;

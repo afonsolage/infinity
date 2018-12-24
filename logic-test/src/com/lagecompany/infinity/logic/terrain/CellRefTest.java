@@ -17,7 +17,7 @@ public class CellRefTest {
 		Random rnd = new Random();
 		buffer = new TerrainBuffer();
 		buffer.allocate();
-		ref = buffer.get(rnd.nextInt(TerrainBuffer.WIDTH), rnd.nextInt(TerrainBuffer.HEIGHT),
+		ref = buffer.getCell(rnd.nextInt(TerrainBuffer.WIDTH), rnd.nextInt(TerrainBuffer.HEIGHT),
 				rnd.nextInt(TerrainBuffer.DEPTH));
 	}
 

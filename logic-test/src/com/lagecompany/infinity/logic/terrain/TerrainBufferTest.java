@@ -14,16 +14,16 @@ class TerrainBufferTest {
 		Assertions.assertEquals(0, TerrainBuffer.toIndex(0, 0, 0));
 
 		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toIndex(-1, 0, 0));
-		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toIndex(0, -1, TerrainBuffer.DEPTH));
-		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toIndex(0, TerrainBuffer.HEIGHT, 0));
+		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toIndex(0, -1, TerrainBuffer.Z_SIZE));
+		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toIndex(0, TerrainBuffer.Y_SIZE, 0));
 
 		Assertions.assertEquals(TerrainBuffer.BUFFER_LENGTH - 1,
-				TerrainBuffer.toIndex(TerrainBuffer.WIDTH - 1, TerrainBuffer.HEIGHT - 1, TerrainBuffer.DEPTH - 1));
+				TerrainBuffer.toIndex(TerrainBuffer.X_SIZE - 1, TerrainBuffer.Y_SIZE - 1, TerrainBuffer.Z_SIZE - 1));
 
 		int expected = TerrainBuffer.BUFFER_LENGTH - 1;
-		for (int x = TerrainBuffer.WIDTH - 1; x >= 0; x--) {
-			for (int y = TerrainBuffer.HEIGHT - 1; y >= 0; y--) {
-				for (int z = TerrainBuffer.DEPTH - 1; z >= 0; z--) {
+		for (int z = TerrainBuffer.Z_SIZE - 1; z >= 0; z--) {
+			for (int x = TerrainBuffer.X_SIZE - 1; x >= 0; x--) {
+				for (int y = TerrainBuffer.Y_SIZE - 1; y >= 0; y--) {
 					Assertions.assertEquals(expected--, TerrainBuffer.toIndex(x, y, z));
 				}
 			}
@@ -37,7 +37,8 @@ class TerrainBufferTest {
 		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toPosition(-1));
 		Assertions.assertThrows(RuntimeException.class, () -> TerrainBuffer.toPosition(TerrainBuffer.BUFFER_LENGTH));
 
-		Assertions.assertEquals(new Vector3(TerrainBuffer.WIDTH - 1, TerrainBuffer.HEIGHT - 1, TerrainBuffer.DEPTH - 1),
+		Assertions.assertEquals(
+				new Vector3(TerrainBuffer.X_SIZE - 1, TerrainBuffer.Y_SIZE - 1, TerrainBuffer.Z_SIZE - 1),
 				TerrainBuffer.toPosition(TerrainBuffer.BUFFER_LENGTH - 1));
 
 		Assertions.assertEquals(new Vector3(1, 1, 1),
@@ -47,9 +48,8 @@ class TerrainBufferTest {
 
 		for (int i = 0; i < TerrainBuffer.BUFFER_LENGTH; i++) {
 			Vector3 position = TerrainBuffer.toPosition(i);
-			Assertions.assertTrue(position.x == (i / TerrainBuffer.X_UNIT)
-					&& position.y == ((i % TerrainBuffer.X_UNIT) / TerrainBuffer.Y_UNIT)
-					&& position.z == ((i % TerrainBuffer.Y_UNIT) / TerrainBuffer.Z_UNIT));
+			Assertions.assertTrue(position.x == (i % TerrainBuffer.Z_UNIT) / TerrainBuffer.X_UNIT
+					&& position.y == i % TerrainBuffer.X_UNIT && position.z == i / TerrainBuffer.Z_UNIT);
 		}
 	}
 
@@ -112,21 +112,21 @@ class TerrainBufferTest {
 	void testGetCellRef() {
 		TerrainBuffer buffer = new TerrainBuffer();
 
-		Assertions.assertThrows(RuntimeException.class, () -> buffer.get(-1, 0, 0));
-		Assertions.assertThrows(RuntimeException.class, () -> buffer.get(-1, 0, TerrainBuffer.DEPTH));
-		Assertions.assertThrows(RuntimeException.class, () -> buffer.get(0, 0, TerrainBuffer.DEPTH));
-		Assertions.assertThrows(NullPointerException.class, () -> buffer.get(0, 0, 0));
+		Assertions.assertThrows(RuntimeException.class, () -> buffer.getCell(-1, 0, 0));
+		Assertions.assertThrows(RuntimeException.class, () -> buffer.getCell(-1, 0, TerrainBuffer.Z_SIZE));
+		Assertions.assertThrows(RuntimeException.class, () -> buffer.getCell(0, 0, TerrainBuffer.Z_SIZE));
+		Assertions.assertThrows(NullPointerException.class, () -> buffer.getCell(0, 0, 0));
 
 		buffer.allocate();
 
-		Assertions.assertNotNull(buffer.get(0, 0, 0));
+		Assertions.assertNotNull(buffer.getCell(0, 0, 0));
 
 		Random rnd = new Random();
 		for (int i = 0; i < 500; i++)
-			Assertions.assertNotNull(buffer.get(rnd.nextInt(TerrainBuffer.WIDTH), rnd.nextInt(TerrainBuffer.HEIGHT),
-					rnd.nextInt(TerrainBuffer.DEPTH)));
+			Assertions.assertNotNull(buffer.getCell(rnd.nextInt(TerrainBuffer.X_SIZE),
+					rnd.nextInt(TerrainBuffer.Y_SIZE), rnd.nextInt(TerrainBuffer.Z_SIZE)));
 
-		Assertions
-				.assertNotNull(buffer.get(TerrainBuffer.WIDTH - 1, TerrainBuffer.HEIGHT - 1, TerrainBuffer.DEPTH - 1));
+		Assertions.assertNotNull(
+				buffer.getCell(TerrainBuffer.X_SIZE - 1, TerrainBuffer.Y_SIZE - 1, TerrainBuffer.Z_SIZE - 1));
 	}
 }

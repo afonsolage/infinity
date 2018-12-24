@@ -2,17 +2,35 @@ package com.lagecompany.infinity.environment.terrain;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.lagecompany.infinity.logic.terrain.TerrainBuffer;
 
 public class TileCell extends Actor {
 
 	// TODO: Add other business data
 	private final Sprite sprite;
+	private final TileType type;
 	private final int index;
 
-	public TileCell(int index, Sprite sprite) {
-		this.sprite = sprite;
+	private final float z;
+
+	public TileCell(int index, TileType type, Sprite sprite) {
 		this.index = index;
+		this.type = type;
+		this.sprite = sprite;
+
+		Vector3 isometric = IsometricTileMap.toIsometric(TerrainBuffer.toPosition(index));
+		z = isometric.z;
+		setPosition(isometric.x, isometric.y);
+	}
+
+	public float getZ() {
+		return z;
+	}
+
+	public TileType getType() {
+		return type;
 	}
 
 	public Sprite getSprite() {
@@ -61,9 +79,5 @@ public class TileCell extends Actor {
 	}
 
 	public void dispose() {
-	}
-
-	public int getOrder() {
-		return -((int) getY() << 12) - (int) getX();
 	}
 }
