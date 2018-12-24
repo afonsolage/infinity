@@ -1,0 +1,41 @@
+apply plugin: "java"
+
+sourceCompatibility = 1.8
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.test.java.srcDirs = [ "src/" ]
+
+project.ext.assetsDir = new File("../core/assets");
+
+eclipse.project {
+    name = appName + "-logic-test"
+    linkedResource name: 'assets', type: '2', location: 'PARENT-1-PROJECT_LOC/core/assets'
+}
+
+dependencies {
+	compile 'org.junit.jupiter:junit-jupiter-api:5.+'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
+    
+	compile 'org.mockito:mockito-core:2.+'
+    testImplementation 'org.mockito:mockito-core:2.+'
+
+	compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+    testRuntimeOnly "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.+'
+}
+
+
+test {
+    // Enable JUnit 5 (Gradle 4.6+).
+    useJUnitPlatform()
+
+    // Always run tests, even when nothing changed.
+    dependsOn 'cleanTest'
+
+    // Show test results.
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}

@@ -57,15 +57,13 @@ public class IsometricTileMapTest extends InfinityTest {
 
 	@Test
 	void testCreateCellAt() {
-		Assertions.assertThrows(RuntimeException.class, () -> {
-			map.createCellAt(0, 0);
-		});
+		Assertions.assertThrows(RuntimeException.class, () -> map.createCellAt(0, 0));
 		int count = map.getCellCount();
 		map.createCellAt(-1, -1);
 		map.createCellAt(IsometricTileMap.WIDTH, IsometricTileMap.HEIGHT);
 		Assertions.assertEquals(count + 2, map.getCellCount());
 	}
-	
+
 	@Test
 	void testDestroyCellAt() {
 		int count = map.getCellCount();

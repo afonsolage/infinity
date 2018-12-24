@@ -64,6 +64,6 @@ public class TileCell extends Actor {
 	}
 
 	public int getOrder() {
-		return (int)getY() * -10000 - (int)getX();
+		return -((int) getY() << 12) - (int) getX();
 	}
 }

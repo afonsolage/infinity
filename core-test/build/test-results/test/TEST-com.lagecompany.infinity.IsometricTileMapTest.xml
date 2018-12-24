@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.lagecompany.infinity.IsometricTileMapTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2018-12-23T19:00:31" hostname="ubuntu-desktop" time="0.022">
+<testsuite name="com.lagecompany.infinity.IsometricTileMapTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2018-12-24T10:20:40" hostname="ubuntu-desktop" time="0.029">
   <properties/>
-  <testcase name="testToIndex()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.011"/>
+  <testcase name="testCellCount()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.013"/>
+  <testcase name="testToIndex()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.0"/>
+  <testcase name="testDestroyCellAt()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.001"/>
   <testcase name="testToPosition()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.001"/>
-  <testcase name="testInstanciateIsometricTileMap()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.007"/>
-  <testcase name="testCreateCellAt()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.0"/>
+  <testcase name="testInstanciateIsometricTileMap()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.005"/>
+  <testcase name="testCreateCellAt()" classname="com.lagecompany.infinity.IsometricTileMapTest" time="0.004"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -16,7 +16,7 @@ public class InfinityGame extends ApplicationAdapter {
 	@Override
 	public void create() {
 		ScreenViewport screenViewport = new ScreenViewport();
-		screenViewport.setUnitsPerPixel(2.5f);
+//		screenViewport.setUnitsPerPixel(2.5f);
 		gameStage = new Stage(screenViewport);
 
 		gameStage.addActor(new IsometricTileMap());
