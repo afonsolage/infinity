@@ -31,12 +31,32 @@ public class TerrainBuffer {
 	 */
 	public static final int BUFFER_LENGTH = WIDTH * HEIGHT * DEPTH;
 
-	/**
-	 * Internal helper constant. Used to save some calculations, since this is a
-	 * common calculation. Holds the precomputed value of HEIGHT * DEPTH
-	 */
-	//The access modified should default since we'r gonna use it on test classes also
-	static final int HEIGHT_X_DEPTH = HEIGHT * DEPTH;
+	// The access modified should default since we'r gonna use it on test classes
+	// also
+	static final int X_UNIT = HEIGHT * DEPTH;
+	static final int Y_UNIT = DEPTH;
+	static final int Z_UNIT = 1;
+
+	public static int toIndex(int x, int y, int z) {
+		checkBounds(x, y, z);
+		return (x * X_UNIT) + (y * Y_UNIT) + (z * Z_UNIT);
+	}
+
+	public static Vector3 toPosition(int index) {
+		checkBounds(index);
+
+		return new Vector3(index / X_UNIT, (index % TerrainBuffer.X_UNIT) / Y_UNIT, (index % Y_UNIT) / Z_UNIT);
+	}
+
+	private static void checkBounds(int x, int y, int z) {
+		if (x < 0 || y < 0 || z < 0 || x >= WIDTH || y >= HEIGHT || z >= DEPTH)
+			throw new RuntimeException("Invalid bounds: " + x + ", " + y + ", " + z);
+	}
+
+	private static void checkBounds(int index) {
+		if (index < 0 || index >= BUFFER_LENGTH)
+			throw new RuntimeException("Invalid index: " + index);
+	}
 
 	private long[] buffer;
 
@@ -53,24 +73,19 @@ public class TerrainBuffer {
 		return buffer != null;
 	}
 
-	public static int toIndex(int x, int y, int z) {
-		checkBounds(x, y, z);
-		return (x * HEIGHT_X_DEPTH) + (y * DEPTH) + z;
-	}
-
-	public static Vector3 toPosition(int index) {
+	long get(int index) {
 		checkBounds(index);
 
-		return new Vector3(index / HEIGHT / DEPTH, index / DEPTH, index % DEPTH);
+		return buffer[index];
 	}
 
-	private static void checkBounds(int x, int y, int z) {
-		if (x < 0 || y < 0 || z < 0 || x >= WIDTH || y >= HEIGHT || z >= DEPTH)
-			throw new RuntimeException("Invalid bounds: " + x + ", " + y + ", " + z);
-	}
+	void set(int index, long value) {
+		checkBounds(index);
 
-	private static void checkBounds(int index) {
-		if (index < 0 || index >= BUFFER_LENGTH)
-			throw new RuntimeException("Invalid index: " + index);
+		buffer[index] = value;
+	}
+	
+	public CellRef get(int x, int y, int z) {
+		return new CellRef(this, toIndex(x, y, z));
 	}
 }
