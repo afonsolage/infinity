@@ -16,15 +16,15 @@ public class IsometricTileMap extends Actor {
 	private static final String LOG_TAG = IsometricTileMap.class.getSimpleName();
 
 	private final TextureAtlas atlas;
-	private final TerrainBuffer buffer;
+	private final TerrainController controller;
 	private final TileCell[] cells;
 
-	public IsometricTileMap(TerrainBuffer buffer) {
-		if (buffer == null || !buffer.isAllocated()) {
-			logAndThrow("Invalid buffed received");
+	public IsometricTileMap(TerrainController controller) {
+		if (controller == null) {
+			logAndThrow("Invalid controller received");
 		}
 
-		this.buffer = buffer;
+		this.controller = controller;
 		this.cells = new TileCell[TerrainBuffer.BUFFER_LENGTH];
 		this.atlas = new TextureAtlas(Gdx.files.internal("atlas/terrain.atlas"));
 	}
@@ -35,7 +35,7 @@ public class IsometricTileMap extends Actor {
 		throw exception;
 	}
 
-	private void updateTileCells() {
+	private void updateTileCells(TerrainBuffer buffer) {
 		for (int i = 0; i < TerrainBuffer.BUFFER_LENGTH; i++) {
 			CellRef cell = buffer.getCell(i);
 
@@ -141,9 +141,9 @@ public class IsometricTileMap extends Actor {
 
 	@Override
 	public void act(float delta) {
-		if (buffer.isDirt()) {
-			updateTileCells();
-			buffer.setDirt(false);
+		if (controller.isBufferDirt()) {
+			updateTileCells(controller.getBuffer());
+			controller.cleanBufferDirtiness();
 		}
 	}
 

@@ -131,7 +131,6 @@ public class TerrainBuffer {
 		checkBounds(index);
 
 		buffer[index] = value;
-		dirt = true;
 	}
 
 	public CellRef getCell(int x, int y, int z) {
