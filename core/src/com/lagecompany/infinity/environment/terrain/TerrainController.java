@@ -1,9 +1,14 @@
 package com.lagecompany.infinity.environment.terrain;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.lagecompany.infinity.logic.terrain.CellRef;
 import com.lagecompany.infinity.logic.terrain.TerrainBuffer;
+import com.lagecompany.infinity.rx.GdxSchedulers;
 
-public class TerrainController implements Runnable {
+import io.reactivex.schedulers.Schedulers;
+
+public class TerrainController {
 
 	private TerrainBuffer frontBuffer;
 	private TerrainBuffer backBuffer;
@@ -13,40 +18,15 @@ public class TerrainController implements Runnable {
 		backBuffer = new TerrainBuffer(true);
 	}
 
-	private boolean running;
-	private Thread thread;
-
 	public void start() {
-		thread = new Thread(this);
-		thread.setName("TerrainControl");
-		thread.start();
+		Schedulers.computation().scheduleDirect(this::generateTerrain);
 	}
 
 	public void stop() {
-		running = false;
 	}
 
 	public TerrainBuffer getBuffer() {
 		return frontBuffer;
-	}
-
-	@Override
-	public void run() {
-		running = true;
-
-		
-		generateTerrain();
-
-		while (running && !Thread.interrupted()) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
-
-		frontBuffer.free();
-		backBuffer.free();
 	}
 
 	private void generateTerrain() {
@@ -96,9 +76,17 @@ public class TerrainController implements Runnable {
 			swapBuffers();
 	}
 
+	private AtomicBoolean swapRequested = new AtomicBoolean(false);
+
 	private void swapBuffers() {
-		TerrainBuffer tmp = frontBuffer;
-		frontBuffer = backBuffer;
-		backBuffer = tmp;
+		if (!swapRequested.compareAndSet(false, true))
+			return;
+
+		GdxSchedulers.main().scheduleDirect(() -> {
+			TerrainBuffer tmp = frontBuffer;
+			frontBuffer = backBuffer;
+			backBuffer = tmp;
+			swapRequested.set(false);
+		});
 	}
 }

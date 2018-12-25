@@ -88,28 +88,6 @@ public class IsometricTileMap extends Actor {
 		}
 	}
 
-//	public void createCellAt(int x, int y, TileType type) {
-//		int index = toIndex(x, y);
-//		if (cells.contains(index)) {
-//			throw new RuntimeException("Failed to create cell at position " + x + "," + "y" + ". Cell already exists");
-//		}
-//
-//		Sprite sprite = atlas.createSprite(type.toString());
-//
-//		if (sprite == null) {
-//			throw new RuntimeException("Failed to create cell at position " + x + "," + "y" + ". Sprite with name "
-//					+ type.toString() + " not found.");
-//		}
-//
-//		TileCell cell = new TileCell(index, sprite);
-//		Vector2 pos = new Vector2(x, y);
-//		pos = toIsometric(pos);
-//		cell.setPosition(pos.x, pos.y);
-//		cells.put(index, cell);
-//
-//		dirtOrder = true;
-//	}
-
 	public int countCells() {
 		return getCells(c -> true).size();
 	}
