@@ -33,7 +33,7 @@ public class GameStage extends AbstractStage {
 
 	private void initTerrain() {
 		terrainController = new TerrainController();
-		terrainController.start();
+		terrainController.init();
 		map = new IsometricTileMap(terrainController);
 
 		addActor(map);
@@ -47,7 +47,7 @@ public class GameStage extends AbstractStage {
 	@Override
 	public void finalize() {
 		map.dispose();
-		terrainController.stop();
+		terrainController.dispose();
 	}
 
 }

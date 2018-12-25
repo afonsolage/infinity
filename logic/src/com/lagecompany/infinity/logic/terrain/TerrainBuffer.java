@@ -98,7 +98,7 @@ public class TerrainBuffer {
 	}
 
 	private long[] buffer;
-	private boolean dirt = false;
+	private volatile boolean dirt = false;
 
 	public boolean isDirt() {
 		return dirt;
@@ -139,5 +139,9 @@ public class TerrainBuffer {
 
 	public CellRef getCell(int index) {
 		return new CellRef(this, index);
+	}
+	
+	public void copy(TerrainBuffer other) {
+		System.arraycopy(other.buffer, 0, this.buffer, 0, BUFFER_LENGTH);
 	}
 }

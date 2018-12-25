@@ -1,28 +1,76 @@
 package com.lagecompany.infinity.environment.terrain;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Disposable;
+import com.lagecompany.infinity.environment.terrain.event.EventData;
+import com.lagecompany.infinity.environment.terrain.event.EventType;
+import com.lagecompany.infinity.environment.terrain.event.UpdateCell;
 import com.lagecompany.infinity.logic.terrain.CellRef;
 import com.lagecompany.infinity.logic.terrain.TerrainBuffer;
-import com.lagecompany.infinity.rx.GdxSchedulers;
 
 import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 
-public class TerrainController {
+public class TerrainController implements Disposable {
 
-	private TerrainBuffer frontBuffer;
-	private TerrainBuffer backBuffer;
+	private static final String LOG_TAG = TerrainController.class.getSimpleName();
+
+	private final Subject<EventData> subject;
+	private final io.reactivex.disposables.Disposable subscription;
+
+	private final TerrainBuffer swapBuffer;
+	private final TerrainBuffer frontBuffer;
+	private final TerrainBuffer backBuffer;
 
 	public TerrainController() {
+		swapBuffer = new TerrainBuffer(true);
 		frontBuffer = new TerrainBuffer(true);
 		backBuffer = new TerrainBuffer(true);
+
+		subject = PublishSubject.<EventData>create().toSerialized();
+
+		subscription = subject.observeOn(Schedulers.computation()).subscribe(this::processEvent, this::onError, this::onComplete);
 	}
 
-	public void start() {
-		Schedulers.computation().scheduleDirect(this::generateTerrain);
+	public void init() {
+		publishEvent(new EventData(EventType.INIT));
 	}
 
-	public void stop() {
+	public void publishEvent(EventData event) {
+		subject.onNext(event);
+	}
+
+	private void processEvent(EventData event) {
+		Gdx.app.debug(LOG_TAG, "Processing event: " + event.getType());
+
+		switch (event.getType()) {
+		case INIT:
+			generateTerrain();
+			break;
+		case UPDATE_CELL:
+			updateCell(event.getData());
+			break;
+		default:
+			Gdx.app.debug(LOG_TAG, "Terrain event not supported: " + event.getType());
+			throw new UnsupportedOperationException("Terrain Event " + event.getType());
+		}
+	}
+
+	private void onError(Throwable t) {
+		Gdx.app.error(LOG_TAG, "Unhandled exception at Terrain Controller: " + t.getMessage());
+	}
+	
+	private void onComplete() {
+		Gdx.app.debug(LOG_TAG, "Terrain Controller completed.");
+	}
+	
+	private void updateCell(UpdateCell data) {
+		CellRef cell = backBuffer.getCell(data.getX(), data.getY(), data.getZ());
+		cell.setTileType(data.getType().ordinal());
+		cell.save();
+
+		swapBackBuffer();
 	}
 
 	public TerrainBuffer getBuffer() {
@@ -40,30 +88,16 @@ public class TerrainController {
 			}
 		}
 
-		CellRef cell = backBuffer.getCell(0, 0, 2);
-		cell.setTileType(0);
-		cell.save();
+		publishEvent(new EventData(EventType.UPDATE_CELL, new UpdateCell(0, 0, 1, TileType.DIRT)));
 
-		cell = backBuffer.getCell(0, 0, 1);
-		cell.setTileType(2);
-		cell.save();
-
-		cell = backBuffer.getCell(0, 1, 3);
-		cell.setTileType(2);
-		cell.save();
-
-		cell = backBuffer.getCell(1, 0, 3);
-		cell.setTileType(2);
-		cell.save();
-
-		backBuffer.setDirt(true);
+		swapBackBuffer();
 	}
 
 	public boolean isBufferDirt() {
 		if (frontBuffer.isDirt()) {
 			return true;
-		} else if (backBuffer.isDirt()) {
-			swapBuffers();
+		} else if (swapBuffer.isDirt()) {
+			swapFrontBuffer();
 			return true;
 		} else {
 			return false;
@@ -72,21 +106,27 @@ public class TerrainController {
 
 	public void cleanBufferDirtiness() {
 		frontBuffer.setDirt(false);
-		if (backBuffer.isDirt())
-			swapBuffers();
 	}
 
-	private AtomicBoolean swapRequested = new AtomicBoolean(false);
+	private void swapBackBuffer() {
+		synchronized (swapBuffer) {
+			swapBuffer.copy(backBuffer);
+			swapBuffer.setDirt(true);
+			backBuffer.setDirt(false);
+		}
+	}
 
-	private void swapBuffers() {
-		if (!swapRequested.compareAndSet(false, true))
-			return;
+	private void swapFrontBuffer() {
+		synchronized (swapBuffer) {
+			frontBuffer.copy(swapBuffer);
+			frontBuffer.setDirt(true);
+			swapBuffer.setDirt(false);
+		}
+	}
 
-		GdxSchedulers.main().scheduleDirect(() -> {
-			TerrainBuffer tmp = frontBuffer;
-			frontBuffer = backBuffer;
-			backBuffer = tmp;
-			swapRequested.set(false);
-		});
+	@Override
+	public void dispose() {
+		subject.onComplete();
+		subscription.dispose();
 	}
 }

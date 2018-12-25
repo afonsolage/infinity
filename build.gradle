@@ -63,6 +63,7 @@ project(":core") {
     dependencies {
     	compile project(":logic")
     	compile "io.reactivex.rxjava2:rxjava:2.2.+"
+		compile "de.ruedigermoeller:fst:2.57"
     }
 }
 
