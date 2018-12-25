@@ -7,57 +7,23 @@ import com.lagecompany.infinity.stage.AbstractStage;
 import com.lagecompany.infinity.stage.GameStage;
 import com.lagecompany.infinity.stage.StageType;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
+
 public class InfinityGame extends ApplicationAdapter {
 
+	private static final int MAX_TASKS_PER_FRAME = 10;
+
 	private AbstractStage currentStage;
+	private static TLongObjectHashMap<Runnable> scheduledTasks = new TLongObjectHashMap<>();
+
+	public static void scheduleTask(long when, Runnable task) {
+		scheduledTasks.put(when, task);
+	}
 
 	@Override
 	public void create() {
 		changeStage(StageType.Game);
-		
-//		ScreenViewport screenViewport = new ScreenViewport();
-//		screenViewport.setUnitsPerPixel(2.5f);
-//		gameStage = new Stage(screenViewport);
-//
-//		TerrainBuffer buffer = new TerrainBuffer();
-//		buffer.allocate();
-//
-//		dummyFillBuffer(buffer);
-//
-//		gameStage.addActor(new IsometricTileMap(buffer));
-//
-//		// TODO: Add proper camera handling later
-//		Camera cam = gameStage.getCamera();
-//		cam.translate(new Vector3(50 - screenViewport.getWorldWidth() / 2, -50, 0));
 	}
-
-//	private void dummyFillBuffer(TerrainBuffer buffer) {
-//		for (int x = 0; x < TerrainBuffer.X_SIZE; x++) {
-//			for (int y = 0; y < TerrainBuffer.Y_SIZE; y++) {
-//				CellRef cell = buffer.getCell(x, y, 2);
-//				cell.setTileType(
-//						x == 0 || y == 0 || x == TerrainBuffer.X_SIZE - 1 || y == TerrainBuffer.Y_SIZE - 1 ? 3 : 1);
-//				
-//				cell.save();
-//			}
-//		}
-//		
-//		CellRef cell = buffer.getCell(0,0,2);
-//		cell.setTileType(0);
-//		cell.save();
-//		
-//		cell = buffer.getCell(0,0,1);
-//		cell.setTileType(2);
-//		cell.save();
-//		
-//		cell = buffer.getCell(0,1,3);
-//		cell.setTileType(2);
-//		cell.save();
-//		
-//		cell = buffer.getCell(1,0,3);
-//		cell.setTileType(2);
-//		cell.save();
-//	}
 
 	@Override
 	public void resize(int width, int height) {
@@ -69,8 +35,31 @@ public class InfinityGame extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+		checkScheduledTasks();
+
 		currentStage.act();
 		currentStage.draw();
+	}
+
+	private long[] executedTasks = new long[MAX_TASKS_PER_FRAME];
+
+	private void checkScheduledTasks() {
+		long now = System.currentTimeMillis();
+
+		int executedCount = 0;
+
+		for (long when : scheduledTasks.keys()) {
+			if (when <= now) {
+				scheduledTasks.get(when).run();
+				executedTasks[executedCount++] = when;
+				if (executedCount == executedTasks.length)
+					break;
+			}
+		}
+
+		for (long key : executedTasks) {
+			scheduledTasks.remove(key);
+		}
 	}
 
 	@Override

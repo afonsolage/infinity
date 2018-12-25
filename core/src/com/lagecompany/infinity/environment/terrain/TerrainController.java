@@ -34,6 +34,7 @@ public class TerrainController implements Runnable {
 	public void run() {
 		running = true;
 
+		
 		generateTerrain();
 
 		while (running && !Thread.interrupted()) {
