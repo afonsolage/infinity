@@ -1,0 +1,7 @@
+<window title="Map Sprite Sheet" onecolumn="true">
+	<button onclick="setView" id="main-view">Back</button>
+	-----------------------------------------------------
+	Set sprite sheet path on assets folder:
+	<textField id="spriteSheetPath" value="body_male.png"/>
+	<button onclick="processSpriteSheet">Process</button>
+</window>

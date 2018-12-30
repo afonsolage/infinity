@@ -1,0 +1,3 @@
+<window title="Infinity Dev Tool" onecolumn="true">
+	<button onclick="setView" id="map-sprite-sheet-view">Map Sprite Sheet</button>
+</window>

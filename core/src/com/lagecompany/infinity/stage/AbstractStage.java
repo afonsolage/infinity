@@ -1,26 +1,26 @@
 package com.lagecompany.infinity.stage;
 
+import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.lagecompany.infinity.InfinityGame;
 
 public abstract class AbstractStage extends Stage {
 
 	private final StageType type;
-	private final InfinityGame game;
 
-	public AbstractStage(StageType type, InfinityGame game) {
+	public AbstractStage(StageType type) {
 		super(new ScreenViewport());
 		this.type = type;
-		this.game = game;
 	}
 
 	public StageType getType() {
 		return type;
 	}
 
-	public InfinityGame getGame() {
-		return game;
+	@SuppressWarnings("unchecked")
+	public <T extends ApplicationListener> T getApp() {
+		return (T) Gdx.app.getApplicationListener();
 	}
 
 	@Override
@@ -30,5 +30,6 @@ public abstract class AbstractStage extends Stage {
 	}
 
 	public abstract void initialize();
+
 	public abstract void finalize();
 }

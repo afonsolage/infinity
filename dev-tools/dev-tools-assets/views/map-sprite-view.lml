@@ -1,0 +1,18 @@
+<window title="Map Sprite" onecolumn="true">
+	<image id="currentImage" />
+	<textField id="spriteName" message="Sprite Name" />
+	<textButton id="nextBtn" onclick="next">Next</textButton>
+	<textButton id="skipBtn" onclick="skip">Skip</textButton>
+	<textButton id="prevBtn" onclick="prev" disabled="true">Prev</textButton>
+	-----------------------------
+	<textButton>
+		Cancel
+		<clickListener>
+			<dialog>
+				Are you sure?
+				<textButton onResult="setView" id="map-sprite-sheet-view">Yes</textButton>
+				<textButton onResult="close">No</textButton>
+			</dialog>
+		</clickListener>
+	</textButton>
+</window>

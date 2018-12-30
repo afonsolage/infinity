@@ -6,6 +6,7 @@ import com.lagecompany.infinity.InfinityGame;
 import com.lagecompany.infinity.environment.terrain.IsometricTileMap;
 import com.lagecompany.infinity.environment.terrain.TerrainController;
 import com.lagecompany.infinity.environment.terrain.TileType;
+import com.lagecompany.infinity.object.Player;
 
 public class GameStage extends AbstractStage {
 
@@ -16,7 +17,7 @@ public class GameStage extends AbstractStage {
 	private OrthographicCamera cam;
 
 	public GameStage(InfinityGame game) {
-		super(StageType.Game, game);
+		super(StageType.Game);
 	}
 
 	@Override
@@ -37,6 +38,7 @@ public class GameStage extends AbstractStage {
 		map = new IsometricTileMap(terrainController);
 
 		addActor(map);
+		addActor(new Player());
 	}
 
 	private void initViewport() {
