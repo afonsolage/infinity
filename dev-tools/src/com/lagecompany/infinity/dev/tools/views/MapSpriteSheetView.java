@@ -98,6 +98,7 @@ public class MapSpriteSheetView extends AbstractLmlView {
 
 		MapSpriteView.texture = texture;
 		MapSpriteView.regions = regions;
+		MapSpriteView.texturePath = spriteSheetPath.getText();
 
 		game.setView(MapSpriteView.class);
 	}
@@ -127,6 +128,9 @@ public class MapSpriteSheetView extends AbstractLmlView {
 				result.add(region);
 			}
 		}
+
+		result.sort((a, b) -> (a.getRegionX() + (a.getRegionY() / 80) * 1000)
+				- (b.getRegionX() + (b.getRegionY() / 80) * 1000));
 
 		return result;
 	}

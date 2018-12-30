@@ -1,19 +1,33 @@
 package com.lagecompany.infinity.dev.tools.views;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
+import com.badlogic.gdx.utils.Json;
 import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
 import com.github.czyzby.lml.parser.impl.AbstractLmlView;
+import com.kotcrab.vis.ui.layout.DragPane;
+import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisImage;
+import com.kotcrab.vis.ui.widget.VisLabel;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisTextField;
+import com.kotcrab.vis.ui.widget.VisWindow;
+import com.lagecompany.infinity.anim.AnimationData;
 import com.lagecompany.infinity.dev.tools.DevGame;
 
 public class MapSpriteView extends AbstractLmlView {
@@ -22,9 +36,13 @@ public class MapSpriteView extends AbstractLmlView {
 
 	public static List<TextureRegion> regions;
 	public static Texture texture;
+	public static String texturePath;
 
-	@LmlActor("currentImage")
-	private VisImage currentImage;
+	@LmlActor("spriteSheetPane")
+	private DragPane spriteSheetPane;
+
+	@LmlActor("previewImage")
+	private VisImage previewImage;
 
 	@LmlActor("spriteName")
 	private VisTextField spriteName;
@@ -38,18 +56,133 @@ public class MapSpriteView extends AbstractLmlView {
 	@LmlActor("prevBtn")
 	private VisTextButton prevBtn;
 
-	private int nextIndex = 113;
+	@LmlActor("animationPane")
+	private DragPane animPane;
+
+	@LmlActor("msgDialog")
+	private VisDialog msgDialog;
+
+	@LmlActor("msgDialogLabel")
+	private VisLabel msgDialogLabel;
+
+	@LmlActor("frameTimeField")
+	private VisTextField frameTimeField;
+
+	@LmlActor("animNameField")
+	private VisTextField animNameField;
+
+	@LmlActor("animPathField")
+	private VisTextField animPathField;
+
+	private Map<String, Drawable> drawableMap;
+	private Animation<TextureRegion> animation;
+	private float stateTime;
+
+	private List<TextureRegion> regionsPreview;
 
 	public MapSpriteView() {
 		super(DevGame.newStage());
 	}
 
-	@Override
-	public void show() {
-		if (regions.size() > 0)
-			next();
-		else
-			nextBtn.setDisabled(true);
+	@LmlAction("avaiableSpritesX")
+	public float getAvailableSpritesX() {
+		return 0;
+	}
+
+	@LmlAction("avaiableSpritesY")
+	public float getAvailableSpritesY() {
+		return 0;
+	}
+
+	@LmlAction("avaiableSpritesWidth")
+	public int getAvailableSpritesWidth() {
+		return DevGame.WIDTH / 2 - 15;
+	}
+
+	@LmlAction("avaiableSpritesHeight")
+	public int getAvailableSpritesHeight() {
+		return DevGame.HEIGHT - 30;
+	}
+
+	@LmlAction("animationX")
+	public float getAnimationX() {
+		return DevGame.WIDTH / 2;
+	}
+
+	@LmlAction("animationY")
+	public float getAnimationY() {
+		return DevGame.HEIGHT;
+	}
+
+	@LmlAction("animationWidth")
+	public int getAnimationWidth() {
+		return DevGame.WIDTH / 2 - 15;
+	}
+
+	@LmlAction("animationHeight")
+	public int getAnimationHeight() {
+		return DevGame.HEIGHT / 2;
+	}
+
+	@LmlAction("closeDialog")
+	public void closeDialog(Actor actor) {
+		while (actor != null && !(actor instanceof VisWindow)) {
+			actor = actor.getParent();
+		}
+		if (actor != null) {
+			((VisWindow) actor).fadeOut();
+		}
+	}
+
+	@LmlAction("goBack")
+	public void goBack(final VisDialog dialog) {
+		DevGame.getInstance().setView(MapSpriteSheetView.class);
+	}
+
+	@LmlAction("previewAnimation")
+	public void previewAnimation() {
+		if (animPane.getChildren().size < 1) {
+			showMessage("You should add at least 2 sprites");
+			return;
+		}
+
+		List<TextureRegion> regions = new ArrayList<>();
+
+		animPane.getChildren().forEach(actor -> findTextureRegions(actor, regions));
+
+		float frameTime = 0.1f;
+		try {
+			frameTime = Float.parseFloat(frameTimeField.getText());
+		} catch (Exception e) {
+		}
+
+		regionsPreview = regions;
+		animation = new Animation<>(frameTime, regions.toArray(new TextureRegion[regions.size()]));
+		stateTime = 0;
+	}
+
+	private void findTextureRegions(Actor actor, List<TextureRegion> output) {
+		if (actor instanceof Group) {
+			Group group = (Group) actor;
+			group.getChildren().forEach(childActor -> findTextureRegions(childActor, output));
+		}
+
+		if (actor instanceof VisImage) {
+			Drawable drawable = ((VisImage) actor).getDrawable();
+			if (drawable instanceof SpriteDrawable) {
+				SpriteDrawable spriteDrawable = (SpriteDrawable) drawable;
+				Sprite sprite = spriteDrawable.getSprite();
+				output.add(new TextureRegion(sprite.getTexture(), sprite.getRegionX(), sprite.getRegionY(),
+						sprite.getRegionWidth(), sprite.getRegionHeight()));
+			}
+		}
+	}
+
+	private void showMessage(String message) {
+		msgDialogLabel.setText(message);
+		msgDialog.setVisible(true);
+		msgDialog.show(getStage());
+		msgDialog.toFront();
 	}
 
 	@Override
@@ -62,61 +195,99 @@ public class MapSpriteView extends AbstractLmlView {
 		return Gdx.files.internal("views/map-sprite-view.lml");
 	}
 
-	@LmlAction("prev")
-	public void prev() {
-		if (prevBtn.isDisabled())
-			return;
+	@Override
+	public void render(float delta) {
+		updateAnimation(delta);
+		super.render(delta);
+	}
 
-		TextureRegion region = regions.get(nextIndex - 1);
-		currentImage.setDrawable(new SpriteDrawable(new Sprite(region)));
-		
-		nextIndex--;
-		
-		if (nextIndex <= 0) {
-			prevBtn.setDisabled(true);
-			nextIndex = 0;
-		}
+	@Override
+	public void show() {
+		drawableMap = new HashMap<>();
 
-		if (nextIndex < regions.size() && (nextBtn.isDisabled() && skipBtn.isDisabled())) {
-			nextBtn.setDisabled(false);
-			skipBtn.setDisabled(false);
+		for (TextureRegion region : regions) {
+			Drawable drawable = new SpriteDrawable(new Sprite(region));
+			drawableMap.put(getRegionIdentity(region), drawable);
+			spriteSheetPane.addActor(new Container<Actor>(new VisImage(drawable)));
 		}
 	}
 
-	@LmlAction("skip")
-	public void skip() {
-		next(true);
+	@Override
+	public void hide() {
+		reset();
 	}
 
-	@LmlAction("next")
-	public void next() {
-		next(false);
+	public void reset() {
+		msgDialog.hide();
+		regions.clear();
+		animPane.clear();
+		spriteSheetPane.clear();
 	}
 
-	public void next(boolean skip) {
-		if (!skip && nextBtn.isDisabled())
-			return;
-		else if (skip && skipBtn.isDisabled())
+	private void updateAnimation(float delta) {
+		if (regionsPreview == null || regionsPreview.size() == 0)
 			return;
 
-		TextureRegion region = regions.get(nextIndex++);
-		currentImage.setDrawable(new SpriteDrawable(new Sprite(region)));
+		stateTime += delta;
 
-		if (nextIndex >= regions.size()) {
-			nextBtn.setDisabled(true);
-			skipBtn.setDisabled(true);
-			nextIndex = regions.size() - 1;
-		}
+		TextureRegion region = animation.getKeyFrame(stateTime, true);
+		Drawable drawable = getDrawable(region);
 
-		if (nextIndex > 0 && prevBtn.isDisabled()) {
-			prevBtn.setDisabled(false);
-		}
+		previewImage.setDrawable(drawable);
+	}
+
+	private String getRegionIdentity(TextureRegion region) {
+		return region.getRegionX() + "," + region.getRegionY() + "," + region.getRegionWidth() + ","
+				+ region.getRegionHeight();
+	}
+
+	private Drawable getDrawable(TextureRegion region) {
+		return drawableMap.get(getRegionIdentity(region));
 	}
 
 	@Override
 	public void dispose() {
 		super.dispose();
+		reset();
 		texture.dispose();
 	}
 
+	@LmlAction("saveAnimation")
+	public void saveAnimation() {
+		previewAnimation();
+
+		if (regionsPreview == null || regionsPreview.size() < 1) {
+			showMessage("You must supply at least 2 frames to have an animation.");
+			return;
+		}
+
+		if (animNameField.getText().isEmpty()) {
+			showMessage("You must supply an animation name first.");
+			return;
+		}
+
+		float frameTime = 0.1f;
+		try {
+			frameTime = Float.parseFloat(frameTimeField.getText());
+		} catch (Exception e) {
+			showMessage("Invalid frame time. It must be a float number.");
+			return;
+		}
+
+		AnimationData data = new AnimationData(animNameField.getText(), texturePath, frameTime);
+
+		for (TextureRegion region : regionsPreview) {
+			data.addRegion(region.getRegionX(), region.getRegionY(), region.getRegionWidth(), region.getRegionHeight());
+		}
+
+		Json json = new Json();
+		String path = animPathField.getText() + "/" + data.getName() + ".anim";
+		FileHandle handle = Gdx.files.local(path);
+
+		handle.writeString(json.toJson(data), false);
+
+		animPane.clear();
+		regionsPreview.clear();
+		showMessage("Animation saved on file " + path);
+	}
 }

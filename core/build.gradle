@@ -9,3 +9,7 @@ sourceSets.main.resources.srcDirs = [ "assets/" ]
 eclipse.project {
     name = appName + "-core"
 }
+
+dependencies {
+	compile "com.kotcrab.vis:vis-ui:$visuiVersion"
+}

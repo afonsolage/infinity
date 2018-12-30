@@ -1,17 +1,52 @@
-<window title="Map Sprite" onecolumn="true">
-	<image id="currentImage" />
-	<textField id="spriteName" message="Sprite Name" />
-	<textButton id="nextBtn" onclick="next">Next</textButton>
-	<textButton id="skipBtn" onclick="skip">Skip</textButton>
-	<textButton id="prevBtn" onclick="prev" disabled="true">Prev</textButton>
-	-----------------------------
+<dialog id="msgDialog" title="Message" style="dialog" modal=true
+	visible=false>
+	<imageButton style=close-window toTitleTable=true
+		expandX=true align=right onChange=closeDialog />
+	<label id="msgDialogLabel" />
+	<textButton onResult="close" growX=true>OK</textButton>
+</dialog>
+<window title="Avaiable Sprites" x=$avaiableSpritesX
+	y=$avaiableSpritesY>
+	<dragPane id=spriteSheetPane type="grid" itemSize=80
+		minHeight=80 minWidth=40 width=$avaiableSpritesWidth
+		height=$avaiableSpritesHeight>
+	</dragPane>
+</window>
+<window title="Animations" x=$animationX y=$animationY
+	onecolumn=true>
+	<dragPane id="animationPane" type="grid" itemSize=80
+		minHeight=80 minWidth=40 width=$animationWidth height=$animationHeight />
+	<separator pad=2 growX=true />
+	<table width=$animationWidth>
+		<table width=300 height=300>
+			<image id=previewImage />
+		</table>
+		<separator pad=5 growY=true />
+		<table onecolumn=true align=right>
+			<textButton onclick=previewAnimation>Preview</textButton>
+			<textField id="frameTimeField" message="frame time"
+				value="0.1" />
+		</table>
+	</table>
+	<separator pad=2 growX=true />
+	<table>
+		<textField id="animPathField" message="animation path"
+			value="../core/assets/anim/player" growX=true />
+		<separator growY=true pad=1 />
+		<textField id="animNameField" message="animation name"
+			growX=true />
+		<separator growY=true pad=5 />
+		<textButton onclick=saveAnimation>Save</textButton>
+	</table>
+	<separator pad=2 growX=true />
 	<textButton>
 		Cancel
 		<clickListener>
-			<dialog>
-				Are you sure?
-				<textButton onResult="setView" id="map-sprite-sheet-view">Yes</textButton>
-				<textButton onResult="close">No</textButton>
+			<dialog title="Are you sure?" style="dialog">
+				<imageButton style=close-window toTitleTable=true
+					expandX=true align=right onChange=closeDialog />
+				<textButton onResult="goBack" growX=true>Yes</textButton>
+				<textButton onResult="close" growX=true>No</textButton>
 			</dialog>
 		</clickListener>
 	</textButton>
