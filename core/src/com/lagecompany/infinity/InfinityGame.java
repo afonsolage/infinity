@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.lagecompany.infinity.input.InputObserver;
 import com.lagecompany.infinity.stage.AbstractStage;
 import com.lagecompany.infinity.stage.GameStage;
 import com.lagecompany.infinity.stage.StageType;
@@ -24,7 +25,8 @@ public class InfinityGame extends ApplicationAdapter {
 	@Override
 	public void create() {
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
-		
+		InputObserver.init();
+
 		changeStage(StageType.Game);
 	}
 
