@@ -1,0 +1,1 @@
+{name:walk_e,texturePath:body_male.png,frameTime:0.1,flip:true,loop:true,regions:[{x:38,y:318,width:27,height:64},{x:84,y:319,width:33,height:63},{x:144,y:321,width:47,height:61},{x:196,y:320,width:39,height:62},{x:237,y:319,width:28,height:63},{x:281,y:322,width:31,height:60},{x:337,y:321,width:43,height:61},{x:383,y:320,width:33,height:62}]}

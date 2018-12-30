@@ -30,6 +30,7 @@ public class Animator extends Actor {
 
 	public String addAnimation(String path) {
 		try {
+			path = "anim/" + path + ".anim";
 			FileHandle fileHandle = Gdx.files.internal(path);
 			Json json = new Json();
 			AnimationData data = json.fromJson(AnimationData.class, fileHandle);

@@ -26,6 +26,8 @@
 			<textButton onclick=previewAnimation>Preview</textButton>
 			<textField id="frameTimeField" message="frame time"
 				value="0.1" />
+			<checkBox id="flipField">Flip</checkBox>
+			<checkBox id="loopField" checked=true>Loop</checkBox>
 		</table>
 	</table>
 	<separator pad=2 growX=true />

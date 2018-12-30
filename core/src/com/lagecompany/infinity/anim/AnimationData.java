@@ -15,7 +15,6 @@ public class AnimationData {
 		}
 
 		public AnimationDataRegion(final int x, final int y, final int width, final int height) {
-			super();
 			this.x = x;
 			this.y = y;
 			this.width = width;
@@ -59,17 +58,21 @@ public class AnimationData {
 	private String name;
 	private String texturePath;
 	private float frameTime;
+	private boolean flip;
+	private boolean loop;
 	private List<AnimationDataRegion> regions;
 
 	public AnimationData() {
 		regions = new ArrayList<>();
 	}
 
-	public AnimationData(String name, String texturePath, float frameTime) {
+	public AnimationData(String name, String texturePath, float frameTime, boolean flip, boolean loop) {
 		this();
 		this.name = name;
 		this.texturePath = texturePath;
 		this.frameTime = frameTime;
+		this.flip = flip;
+		this.loop = loop;
 	}
 
 	public String getName() {
@@ -94,6 +97,22 @@ public class AnimationData {
 
 	public void setFrameTime(float frameTime) {
 		this.frameTime = frameTime;
+	}
+
+	public boolean isFlip() {
+		return flip;
+	}
+
+	public void setFlip(boolean flip) {
+		this.flip = flip;
+	}
+
+	public boolean isLoop() {
+		return loop;
+	}
+
+	public void setLoop(boolean loop) {
+		this.loop = loop;
 	}
 
 	public void addRegion(int x, int y, int width, int height) {

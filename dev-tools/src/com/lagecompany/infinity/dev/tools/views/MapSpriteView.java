@@ -9,6 +9,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -21,6 +22,7 @@ import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
 import com.github.czyzby.lml.parser.impl.AbstractLmlView;
 import com.kotcrab.vis.ui.layout.DragPane;
+import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisDialog;
 import com.kotcrab.vis.ui.widget.VisImage;
 import com.kotcrab.vis.ui.widget.VisLabel;
@@ -67,6 +69,12 @@ public class MapSpriteView extends AbstractLmlView {
 
 	@LmlActor("frameTimeField")
 	private VisTextField frameTimeField;
+
+	@LmlActor("flipField")
+	private VisCheckBox flipField;
+
+	@LmlActor("loopField")
+	private VisCheckBox loopField;
 
 	@LmlActor("animNameField")
 	private VisTextField animNameField;
@@ -156,8 +164,13 @@ public class MapSpriteView extends AbstractLmlView {
 		} catch (Exception e) {
 		}
 
+		if (flipField.isChecked())
+			regions.forEach(r -> r.flip(true, false));
+
 		regionsPreview = regions;
-		animation = new Animation<>(frameTime, regions.toArray(new TextureRegion[regions.size()]));
+		PlayMode mode = ((loopField.isChecked()) ? PlayMode.LOOP : PlayMode.NORMAL);
+		animation = new Animation<TextureRegion>(frameTime, regions.toArray(new TextureRegion[regions.size()]));
+		animation.setPlayMode(mode);
 		stateTime = 0;
 	}
 
@@ -230,19 +243,20 @@ public class MapSpriteView extends AbstractLmlView {
 
 		stateTime += delta;
 
-		TextureRegion region = animation.getKeyFrame(stateTime, true);
-		Drawable drawable = getDrawable(region);
+		TextureRegion region = animation.getKeyFrame(stateTime);
 
-		previewImage.setDrawable(drawable);
+		Sprite currentSprite = ((SpriteDrawable) previewImage.getDrawable()).getSprite();
+
+		if (region.getRegionX() == currentSprite.getRegionX() && region.getRegionY() == currentSprite.getRegionY()
+				&& currentSprite.isFlipX() == region.isFlipX())
+			return;
+
+		previewImage.setDrawable(new SpriteDrawable(new Sprite(region)));
 	}
 
 	private String getRegionIdentity(TextureRegion region) {
 		return region.getRegionX() + "," + region.getRegionY() + "," + region.getRegionWidth() + ","
 				+ region.getRegionHeight();
-	}
-
-	private Drawable getDrawable(TextureRegion region) {
-		return drawableMap.get(getRegionIdentity(region));
 	}
 
 	@Override
@@ -274,7 +288,8 @@ public class MapSpriteView extends AbstractLmlView {
 			return;
 		}
 
-		AnimationData data = new AnimationData(animNameField.getText(), texturePath, frameTime);
+		AnimationData data = new AnimationData(animNameField.getText(), texturePath, frameTime, flipField.isChecked(),
+				loopField.isChecked());
 
 		for (TextureRegion region : regionsPreview) {
 			data.addRegion(region.getRegionX(), region.getRegionY(), region.getRegionWidth(), region.getRegionHeight());
