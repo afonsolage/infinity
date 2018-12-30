@@ -292,6 +292,8 @@ public class MapSpriteView extends AbstractLmlView {
 				loopField.isChecked());
 
 		for (TextureRegion region : regionsPreview) {
+			if (region.isFlipX())
+				region.flip(true, false);
 			data.addRegion(region.getRegionX(), region.getRegionY(), region.getRegionWidth(), region.getRegionHeight());
 		}
 

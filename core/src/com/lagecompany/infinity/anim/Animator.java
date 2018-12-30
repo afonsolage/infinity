@@ -42,13 +42,18 @@ public class Animator extends Actor {
 
 				List<TextureRegion> regions = new ArrayList<>();
 				for (AnimationDataRegion dataRegion : data.getRegions()) {
-					regions.add(new TextureRegion(texture, dataRegion.getX(), dataRegion.getY(), dataRegion.getWidth(),
-							dataRegion.getHeight()));
+					TextureRegion region = new TextureRegion(texture, dataRegion.getX(), dataRegion.getY(),
+							dataRegion.getWidth(), dataRegion.getHeight());
+
+					if (data.isFlip())
+						region.flip(true, false);
+
+					regions.add(region);
 				}
 
 				Animation<TextureRegion> animation = new Animation<TextureRegion>(data.getFrameTime(),
 						regions.toArray(new TextureRegion[regions.size()]));
-				animation.setPlayMode(PlayMode.LOOP);
+				animation.setPlayMode((data.isLoop() ? PlayMode.LOOP : PlayMode.NORMAL));
 				animationMap.put(data.getName(), animation);
 				return data.getName();
 			}
@@ -59,6 +64,9 @@ public class Animator extends Actor {
 	}
 
 	public boolean playAnimation(String name) {
+		if (name == null || name.equalsIgnoreCase(currentAnimationName))
+			return false;
+
 		Animation<TextureRegion> animation = animationMap.get(name);
 
 		if (animation == null)
@@ -76,6 +84,11 @@ public class Animator extends Actor {
 
 	public void stopAnimation() {
 		currentAnimation = null;
+		currentAnimationName = null;
+	}
+
+	public boolean isPlaying() {
+		return currentAnimation != null;
 	}
 
 	@Override
@@ -84,7 +97,9 @@ public class Animator extends Actor {
 			return;
 
 		TextureRegion region = currentAnimation.getKeyFrame(stateTime);
-		batch.draw(region, getX(), getY());
+
+		batch.draw(region, getX(), getY(), region.getRegionX(), region.getRegionY(), region.getRegionWidth(),
+				region.getRegionHeight(), getScaleX(), getScaleY(), getRotation());
 	}
 
 	@Override
