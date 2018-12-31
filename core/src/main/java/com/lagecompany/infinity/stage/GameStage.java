@@ -6,7 +6,6 @@ import com.lagecompany.infinity.InfinityGame;
 import com.lagecompany.infinity.environment.terrain.IsometricTileMap;
 import com.lagecompany.infinity.environment.terrain.TerrainController;
 import com.lagecompany.infinity.environment.terrain.TileType;
-import com.lagecompany.infinity.object.Player;
 import com.lagecompany.infinty.entity.Moveable;
 
 public class GameStage extends AbstractStage {
