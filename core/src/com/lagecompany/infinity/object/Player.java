@@ -24,7 +24,7 @@ public class Player extends Group {
 
 	public Player() {
 		dir = new Vector2();
-		
+
 		animator = new Animator();
 		animator.addAnimation("player/walk_s");
 		animator.addAnimation("player/walk_sw");
@@ -40,26 +40,26 @@ public class Player extends Group {
 
 		animator.setPosition(50, 50);
 		animator.playAnimation(WALK_N);
-		
+
 		addActor(animator);
 	}
 
 	private void onKeyDown(int keycode) {
 		switch (keycode) {
 		case Keys.W: {
-			dir.y = 1;
+			dir.y++;
 			break;
 		}
 		case Keys.D: {
-			dir.x = 1;
+			dir.x++;
 			break;
 		}
 		case Keys.S: {
-			dir.y = -1;
+			dir.y--;
 			break;
 		}
 		case Keys.A: {
-			dir.x = -1;
+			dir.x--;
 		}
 		}
 	}
@@ -67,19 +67,19 @@ public class Player extends Group {
 	private void onKeyUp(int keycode) {
 		switch (keycode) {
 		case Keys.W: {
-			dir.y = 0;
+			dir.y--;
 			break;
 		}
 		case Keys.D: {
-			dir.x = 0;
+			dir.x--;
 			break;
 		}
 		case Keys.S: {
-			dir.y = 0;
+			dir.y++;
 			break;
 		}
 		case Keys.A: {
-			dir.x = 0;
+			dir.x++;
 		}
 		}
 	}
