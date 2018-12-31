@@ -11,12 +11,12 @@ public class Player extends Group {
 	private static final String ANIM_PATH = "player/";
 	private static final String WALK_S = "walk_s";
 	private static final String WALK_SW = "walk_sw";
-	private static final String WALK_W = "walk_w";
+	private static final String WALK_SE = "walk_se";
+	private static final String WALK_N = "walk_n";
 	private static final String WALK_NW = "walk_nw";
 	private static final String WALK_NE = "walk_ne";
-	private static final String WALK_SE = "walk_se";
 	private static final String WALK_E = "walk_e";
-	private static final String WALK_N = "walk_n";
+	private static final String WALK_W = "walk_w";
 
 	private static final String[] ANIMATIONS = { WALK_S, WALK_SW, WALK_W, WALK_NW, WALK_NE, WALK_SE, WALK_E, WALK_N };
 
