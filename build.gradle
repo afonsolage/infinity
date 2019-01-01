@@ -81,6 +81,7 @@ project(":logic") {
 
 project(":dev-tools") {
     apply plugin: "java"
+    apply plugin: "kotlin"
     
     dependencies {
         compile project(":core")
@@ -88,6 +89,7 @@ project(":dev-tools") {
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.github.czyzby:gdx-lml-vis:1.9.+"
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     }
 }
 

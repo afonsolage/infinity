@@ -1,10 +1,5 @@
 package com.lagecompany.infinity.dev.tools.views;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,15 +17,14 @@ import com.github.czyzby.lml.annotation.LmlAction;
 import com.github.czyzby.lml.annotation.LmlActor;
 import com.github.czyzby.lml.parser.impl.AbstractLmlView;
 import com.kotcrab.vis.ui.layout.DragPane;
-import com.kotcrab.vis.ui.widget.VisCheckBox;
-import com.kotcrab.vis.ui.widget.VisDialog;
-import com.kotcrab.vis.ui.widget.VisImage;
-import com.kotcrab.vis.ui.widget.VisLabel;
-import com.kotcrab.vis.ui.widget.VisTextButton;
-import com.kotcrab.vis.ui.widget.VisTextField;
-import com.kotcrab.vis.ui.widget.VisWindow;
-import com.lagecompany.infinity.anim.AnimationData;
+import com.kotcrab.vis.ui.widget.*;
 import com.lagecompany.infinity.dev.tools.DevGame;
+import com.lagecompany.infinty.animation.AnimationData;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MapSpriteView extends AbstractLmlView {
 
