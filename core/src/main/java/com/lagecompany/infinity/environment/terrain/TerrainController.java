@@ -2,131 +2,147 @@ package com.lagecompany.infinity.environment.terrain;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Disposable;
+import com.github.czyzby.noise4j.map.Grid;
+import com.github.czyzby.noise4j.map.generator.noise.NoiseGenerator;
+import com.github.czyzby.noise4j.map.generator.util.Generators;
 import com.lagecompany.infinity.environment.terrain.event.EventData;
 import com.lagecompany.infinity.environment.terrain.event.EventType;
 import com.lagecompany.infinity.environment.terrain.event.UpdateCell;
 import com.lagecompany.infinity.logic.terrain.CellRef;
 import com.lagecompany.infinity.logic.terrain.TerrainBuffer;
-
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 public class TerrainController implements Disposable {
 
-	private static final String LOG_TAG = TerrainController.class.getSimpleName();
+    private static final String LOG_TAG = TerrainController.class.getSimpleName();
 
-	private final Subject<EventData> subject;
-	private final io.reactivex.disposables.Disposable subscription;
+    private final Subject<EventData> subject;
+    private final io.reactivex.disposables.Disposable subscription;
 
-	private final TerrainBuffer swapBuffer;
-	private final TerrainBuffer frontBuffer;
-	private final TerrainBuffer backBuffer;
+    private final TerrainBuffer swapBuffer;
+    private final TerrainBuffer frontBuffer;
+    private final TerrainBuffer backBuffer;
 
-	public TerrainController() {
-		swapBuffer = new TerrainBuffer(true);
-		frontBuffer = new TerrainBuffer(true);
-		backBuffer = new TerrainBuffer(true);
+    public TerrainController() {
+        swapBuffer = new TerrainBuffer(true);
+        frontBuffer = new TerrainBuffer(true);
+        backBuffer = new TerrainBuffer(true);
 
-		subject = PublishSubject.<EventData>create().toSerialized();
+        subject = PublishSubject.<EventData>create().toSerialized();
 
-		subscription = subject.observeOn(Schedulers.computation()).subscribe(this::processEvent, this::onError, this::onComplete);
-	}
+        subscription = subject.observeOn(Schedulers.computation()).subscribe(this::processEvent, this::onError, this::onComplete);
+    }
 
-	public void init() {
-		publishEvent(new EventData(EventType.INIT));
-	}
+    public void init() {
+        publishEvent(new EventData(EventType.INIT));
+    }
 
-	public void publishEvent(EventData event) {
-		subject.onNext(event);
-	}
+    public void publishEvent(EventData event) {
+        subject.onNext(event);
+    }
 
-	private void processEvent(EventData event) {
-		Gdx.app.debug(LOG_TAG, "Processing event: " + event.getType());
+    private void processEvent(EventData event) {
+        Gdx.app.debug(LOG_TAG, "Processing event: " + event.getType());
 
-		switch (event.getType()) {
-		case INIT:
-			generateTerrain();
-			break;
-		case UPDATE_CELL:
-			updateCell(event.getData());
-			break;
-		default:
-			Gdx.app.debug(LOG_TAG, "Terrain event not supported: " + event.getType());
-			throw new UnsupportedOperationException("Terrain Event " + event.getType());
-		}
-	}
+        switch (event.getType()) {
+            case INIT:
+                generateTerrain();
+                break;
+            case UPDATE_CELL:
+                updateCell(event.getData());
+                break;
+            default:
+                Gdx.app.debug(LOG_TAG, "Terrain event not supported: " + event.getType());
+                throw new UnsupportedOperationException("Terrain Event " + event.getType());
+        }
+    }
 
-	private void onError(Throwable t) {
-		Gdx.app.error(LOG_TAG, "Unhandled exception at Terrain Controller: " + t.getMessage());
-	}
-	
-	private void onComplete() {
-		Gdx.app.debug(LOG_TAG, "Terrain Controller completed.");
-	}
-	
-	private void updateCell(UpdateCell data) {
-		CellRef cell = backBuffer.getCell(data.getX(), data.getY(), data.getZ());
-		cell.setTileType(data.getType().ordinal());
-		cell.save();
+    private void onError(Throwable t) {
+        Gdx.app.error(LOG_TAG, "Unhandled exception at Terrain Controller: " + t.getMessage());
+    }
 
-		swapBackBuffer();
-	}
+    private void onComplete() {
+        Gdx.app.debug(LOG_TAG, "Terrain Controller completed.");
+    }
 
-	public TerrainBuffer getBuffer() {
-		return frontBuffer;
-	}
+    private void updateCell(UpdateCell data) {
+        CellRef cell = backBuffer.getCell(data.getX(), data.getY(), data.getZ());
+        cell.setTileType(data.getType().ordinal());
+        cell.save();
 
-	private void generateTerrain() {
-		for (int x = 0; x < TerrainBuffer.X_SIZE; x++) {
-			for (int y = 0; y < TerrainBuffer.Y_SIZE; y++) {
-				CellRef cell = backBuffer.getCell(x, y, 2);
-				cell.setTileType(
-						x == 0 || y == 0 || x == TerrainBuffer.X_SIZE - 1 || y == TerrainBuffer.Y_SIZE - 1 ? 3 : 1);
+        swapBackBuffer();
+    }
 
-				cell.save();
-			}
-		}
+    public TerrainBuffer getBuffer() {
+        return frontBuffer;
+    }
 
-		publishEvent(new EventData(EventType.UPDATE_CELL, new UpdateCell(0, 0, 1, TileType.DIRT)));
+    private void generateTerrain() {
+        Grid grid = new Grid(TerrainBuffer.X_SIZE);
 
-		swapBackBuffer();
-	}
+        NoiseGenerator noiseGenerator = new NoiseGenerator();
+        noiseGenerator.setRadius(1);
+        noiseGenerator.setModifier(0.05f);
+        noiseGenerator.setSeed(Generators.rollSeed());
+        noiseGenerator.generate(grid);
 
-	public boolean isBufferDirt() {
-		if (frontBuffer.isDirt()) {
-			return true;
-		} else if (swapBuffer.isDirt()) {
-			swapFrontBuffer();
-			return true;
-		} else {
-			return false;
-		}
-	}
+        for (int x = 0; x < TerrainBuffer.X_SIZE; x++) {
+            for (int y = 0; y < TerrainBuffer.Y_SIZE; y++) {
+                int noise = (int) (grid.get(x, y) * 100);
 
-	public void cleanBufferDirtiness() {
-		frontBuffer.setDirt(false);
-	}
+                Gdx.app.log(LOG_TAG, "Noise: " + noise);
 
-	private void swapBackBuffer() {
-		synchronized (swapBuffer) {
-			swapBuffer.copy(backBuffer);
-			swapBuffer.setDirt(true);
-			backBuffer.setDirt(false);
-		}
-	}
+                for (int z = 0; z <= noise && z < TerrainBuffer.Z_SIZE; z++) {
+                    CellRef cell = backBuffer.getCell(x, y, z);
+                    cell.setTileType(
+                            x == 0 || y == 0 || x == TerrainBuffer.X_SIZE - 1 || y == TerrainBuffer.Y_SIZE - 1 ? 3 : 1);
 
-	private void swapFrontBuffer() {
-		synchronized (swapBuffer) {
-			frontBuffer.copy(swapBuffer);
-			frontBuffer.setDirt(true);
-			swapBuffer.setDirt(false);
-		}
-	}
+                    cell.save();
+                }
+            }
+        }
 
-	@Override
-	public void dispose() {
-		subject.onComplete();
-		subscription.dispose();
-	}
+        publishEvent(new EventData(EventType.UPDATE_CELL, new UpdateCell(0, 0, 1, TileType.DIRT)));
+
+        swapBackBuffer();
+    }
+
+    public boolean isBufferDirt() {
+        if (frontBuffer.isDirt()) {
+            return true;
+        } else if (swapBuffer.isDirt()) {
+            swapFrontBuffer();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void cleanBufferDirtiness() {
+        frontBuffer.setDirt(false);
+    }
+
+    private void swapBackBuffer() {
+        synchronized (swapBuffer) {
+            swapBuffer.copy(backBuffer);
+            swapBuffer.setDirt(true);
+            backBuffer.setDirt(false);
+        }
+    }
+
+    private void swapFrontBuffer() {
+        synchronized (swapBuffer) {
+            frontBuffer.copy(swapBuffer);
+            frontBuffer.setDirt(true);
+            swapBuffer.setDirt(false);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        subject.onComplete();
+        subscription.dispose();
+    }
 }

@@ -67,6 +67,7 @@ project(":core") {
         compile "io.reactivex.rxjava2:rxjava:2.2.+"
         compile "de.ruedigermoeller:fst:2.57"
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        compile 'com.github.czyzby:noise4j:0.1.0'
     }
 }
 
