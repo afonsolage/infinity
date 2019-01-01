@@ -1,1 +1,1 @@
-include 'desktop', 'core', 'core-test', 'logic', 'logic-test', 'dev-tools'
+include 'desktop', 'core', 'logic', 'dev-tools'

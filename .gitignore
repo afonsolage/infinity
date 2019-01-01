@@ -123,3 +123,9 @@ Thumbs.db
 !/ios-moe/xcode/*.xcodeproj/xcshareddata
 !/ios-moe/xcode/*.xcodeproj/project.pbxproj
 /ios-moe/xcode/native/
+
+core/out/
+dev-tools/build/
+dev-tools/out/
+logic/out/
+
