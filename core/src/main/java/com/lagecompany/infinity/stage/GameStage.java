@@ -6,6 +6,7 @@ import com.lagecompany.infinity.InfinityGame;
 import com.lagecompany.infinity.environment.terrain.IsometricTileMap;
 import com.lagecompany.infinity.environment.terrain.TerrainController;
 import com.lagecompany.infinity.environment.terrain.TileType;
+import com.lagecompany.infinty.component.CameraFollow;
 import com.lagecompany.infinty.entity.Movable;
 
 public class GameStage extends AbstractStage {
@@ -38,8 +39,9 @@ public class GameStage extends AbstractStage {
 		map = new IsometricTileMap(terrainController);
 
 		addActor(map);
-		addActor(new Movable());
-//		addActor(new Player());
+		Movable player = new Movable();
+		addActor(player);
+		addActor(new CameraFollow(player, getCamera()));
 	}
 
 	private void initViewport() {

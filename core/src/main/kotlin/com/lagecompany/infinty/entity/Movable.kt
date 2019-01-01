@@ -36,7 +36,8 @@ class Movable : Group() {
             }
         }
 
-        animator.setPosition(50f, 50f)
+//        setPosition(100f, 100f)
+
         animator.playAnimation("idle_s")
 
         addActor(animator)
@@ -82,10 +83,6 @@ class Movable : Group() {
             tmp.y += norDir.y * moveSpeed * 0.5f * delta
             setPosition(tmp.x, tmp.y)
         }
-    }
-
-    override fun positionChanged() {
-        animator.setPosition(x, y)
     }
 
     private fun getAnimationName(name: String, dir: Vector2): String {

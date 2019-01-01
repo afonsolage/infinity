@@ -47,7 +47,7 @@ class Animator : Actor() {
             if (data != null) {
                 val texture = Texture(Gdx.files.internal(data.texturePath))
 
-                var regions = mutableListOf<TextureRegion>()
+                val regions = mutableListOf<TextureRegion>()
                 for (dataRegion in data.regions) {
                     val region = TextureRegion(texture, dataRegion.x, dataRegion.y, dataRegion.width, dataRegion.height)
                     if (data.flip)
@@ -55,9 +55,9 @@ class Animator : Actor() {
                     regions.add(region)
                 }
 
-                var animation = Animation<TextureRegion>(data.frameTime, *regions.toTypedArray())
+                val animation = Animation<TextureRegion>(data.frameTime, *regions.toTypedArray())
                 animation.playMode = if (data.loop) PlayMode.LOOP else PlayMode.NORMAL
-                animationMap.put(data.name, animation)
+                animationMap[data.name] = animation
             } else {
                 Gdx.app.error(LOG_TAG, "Failed to parse animation file $path")
             }
@@ -70,7 +70,7 @@ class Animator : Actor() {
         if (name.equals(currentAnimationName, ignoreCase = true))
             return false
 
-        val animation = animationMap.get(name) ?: return false
+        val animation = animationMap[name] ?: return false
 
         currentAnimationName = name
         currentAnimation = animation
@@ -79,17 +79,12 @@ class Animator : Actor() {
         return true
     }
 
-    fun stopAnimation() {
-        currentAnimationName = ""
-    }
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (!isPlaying)
             return
 
         val region = currentAnimation.getKeyFrame(stateTime)
-        batch?.draw(region, x, y, region.regionX.toFloat(), region.regionY.toFloat(), region.regionWidth.toFloat(),
-                region.regionHeight.toFloat(), scaleX, scaleY, rotation)
+        batch?.draw(region, x, y)
     }
 
     override fun act(delta: Float) {
