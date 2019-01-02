@@ -1,27 +1,90 @@
 
 terrain.png
-size: 512,128
+size: 1024,256
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+Look
+  rotate: false
+  xy: 2, 154
+  size: 128, 84
+  orig: 128, 84
+  offset: 0, 0
+  index: -1
 dirt
   rotate: false
-  xy: 2, 2
+  xy: 2, 68
   size: 128, 84
   orig: 128, 84
   offset: 0, 0
   index: -1
 grass
   rotate: false
-  xy: 132, 2
+  xy: 132, 154
   size: 128, 84
   orig: 128, 84
   offset: 0, 0
   index: -1
 rock
   rotate: false
-  xy: 262, 2
+  xy: 132, 68
   size: 128, 84
   orig: 128, 84
+  offset: 0, 0
+  index: -1
+s_e
+  rotate: false
+  xy: 2, 2
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_n
+  rotate: false
+  xy: 262, 174
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_ne
+  rotate: false
+  xy: 132, 2
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_nw
+  rotate: false
+  xy: 262, 108
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_s
+  rotate: false
+  xy: 392, 174
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_se
+  rotate: false
+  xy: 262, 42
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_sw
+  rotate: false
+  xy: 392, 108
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1
+s_w
+  rotate: false
+  xy: 522, 174
+  size: 128, 64
+  orig: 128, 64
   offset: 0, 0
   index: -1

@@ -8,80 +8,107 @@ import com.lagecompany.infinity.logic.terrain.TerrainBuffer;
 
 public class TileCell extends Actor {
 
-	// TODO: Add other business data
-	private final Sprite sprite;
-	private final TileType type;
-	private final int index;
+    public static final int SHADOW_NE = 0;
+    public static final int SHADOW_NW = 1;
+    public static final int SHADOW_SE = 2;
+    public static final int SHADOW_SW = 3;
+    public static final int SHADOW_N = 4;
+    public static final int SHADOW_S = 5;
+    public static final int SHADOW_E = 6;
+    public static final int SHADOW_W = 7;
 
-	private float z;
+    // TODO: Add other business data
+    private final Sprite sprite;
+    private final Sprite[] shadows = new Sprite[8];
 
-	public TileCell(int index, TileType type, Sprite sprite) {
-		this.index = index;
-		this.type = type;
-		this.sprite = sprite;
+    private final TileType type;
+    private final int index;
 
-		calcIsometricPosition();
-	}
+    private float z;
 
-	private void calcIsometricPosition() {
-		Vector3 isometric = IsometricTileMap.toIsometric(TerrainBuffer.toPosition(index));
-		z = isometric.z;
-		setPosition(isometric.x, isometric.y);
-	}
+    public TileCell(int index, TileType type, Sprite sprite) {
+        this.index = index;
+        this.type = type;
+        this.sprite = sprite;
 
-	public float getZ() {
-		return z;
-	}
+//        sprite.setAlpha(0.7f);
+        calcIsometricPosition();
+    }
 
-	public TileType getType() {
-		return type;
-	}
+    private void calcIsometricPosition() {
+        Vector3 isometric = IsometricTileMap.toIsometric(TerrainBuffer.toPosition(index));
+        z = isometric.z;
+        setPosition(isometric.x, isometric.y);
+    }
 
-	public Sprite getSprite() {
-		return sprite;
-	}
+    public float getZ() {
+        return z;
+    }
 
-	public int getIndex() {
-		return index;
-	}
+    public TileType getType() {
+        return type;
+    }
 
-	@Override
-	protected void positionChanged() {
-		sprite.setPosition(getX(), getY());
-	}
+    public Sprite getSprite() {
+        return sprite;
+    }
 
-	@Override
-	public void draw(Batch batch, float parentAlpha) {
-		sprite.draw(batch);
-	}
+    public int getIndex() {
+        return index;
+    }
 
-	@Override
-	public String toString() {
-		return "TileCell [index=" + index + ", name=" + getSprite() + "]";
-	}
+    public void setShadow(int shadowIndex, Sprite shadowSprite) {
+        if (shadowSprite != null)
+            shadowSprite.setPosition(getX(), getY() + TileType.TILE_HEIGHT_OFFSET);
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + index;
-		return result;
-	}
+        shadows[shadowIndex] = shadowSprite;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TileCell other = (TileCell) obj;
-		if (index != other.index)
-			return false;
-		return true;
-	}
+    @Override
+    protected void positionChanged() {
+        for (Sprite shadow : shadows) {
+            if (shadow != null)
+                shadow.setPosition(getX(), getY());
+        }
+        sprite.setPosition(getX(), getY());
+    }
 
-	public void dispose() {
-	}
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+        sprite.draw(batch);
+
+        for (Sprite shadow : shadows) {
+            if (shadow != null) {
+                shadow.draw(batch, parentAlpha);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "TileCell [index=" + index + ", name=" + getSprite() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + index;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        TileCell other = (TileCell) obj;
+        return index == other.index;
+    }
+
+    public void dispose() {
+    }
 }
